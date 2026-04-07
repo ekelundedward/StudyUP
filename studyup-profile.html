@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyUp – Profil</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg:#FAF9F6;--bg-card:#FFFFFF;--bg-soft:#F3F0EB;--bg-softer:#EDE9E2;
+      --green:#3D9970;--green-light:#E8F5EE;--green-dark:#2A6E4F;
+      --text:#1C1C1A;--text-2:#5C5B57;--text-3:#9C9A94;
+      --border:rgba(0,0,0,0.08);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;
+      --sidebar-w:230px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;display:flex;min-height:100vh;}
+
+    .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--bg-card);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 1rem;position:fixed;top:0;left:0;}
+    .logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);padding:0 .5rem 1.25rem;border-bottom:1px solid var(--border);margin-bottom:1rem;cursor:pointer;}
+    .logo span{color:var(--green);}
+    .nav-section-label{font-size:10px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;padding:0 .5rem;margin:.75rem 0 .35rem;}
+    .nav-item{display:flex;align-items:center;gap:9px;padding:.5rem .75rem;border-radius:var(--radius-sm);font-size:13px;color:var(--text-2);cursor:pointer;transition:background .15s,color .15s;text-decoration:none;}
+    .nav-item:hover{background:var(--bg-soft);color:var(--text);}
+    .nav-item.active{background:var(--green-light);color:var(--green-dark);font-weight:500;}
+    .nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+    .sidebar-bottom{margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);}
+    .user-row{display:flex;align-items:center;gap:9px;padding:.5rem .75rem;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s;}
+    .user-row:hover{background:var(--bg-soft);}
+    .avatar-sm{width:30px;height:30px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--green-dark);flex-shrink:0;}
+    .user-name{font-size:13px;font-weight:500;color:var(--text);}
+    .user-xp{font-size:11px;color:var(--text-3);}
+
+    .main{margin-left:var(--sidebar-w);flex:1;padding:2rem 2.5rem;background:var(--bg);}
+
+    .profile-header{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;display:flex;align-items:center;gap:2rem;margin-bottom:1.5rem;}
+    .avatar-lg{width:80px;height:80px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:28px;color:var(--green-dark);flex-shrink:0;}
+    .profile-info{flex:1;}
+    .profile-name{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);letter-spacing:-.3px;margin-bottom:3px;}
+    .profile-uni{font-size:14px;color:var(--text-3);margin-bottom:12px;}
+    .profile-tags{display:flex;gap:8px;flex-wrap:wrap;}
+    .profile-tag{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);color:var(--text-2);background:var(--bg-soft);}
+    .profile-tag.green{background:var(--green-light);color:var(--green-dark);border-color:rgba(61,153,112,.2);}
+    .edit-btn{padding:.55rem 1.1rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-2);background:none;cursor:pointer;transition:background .15s;}
+    .edit-btn:hover{background:var(--bg-soft);}
+    .logout-btn{padding:.55rem 1.1rem;border:1px solid rgba(192,57,43,.2);border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;color:#C0392B;background:none;cursor:pointer;transition:background .15s;margin-left:8px;}
+    .logout-btn:hover{background:#FDEDED;}
+
+    .stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:1.5rem;}
+    .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.2rem;text-align:center;}
+    .stat-num{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);line-height:1;}
+    .stat-label{font-size:12px;color:var(--text-3);margin-top:4px;}
+    .stat-sub{font-size:11px;color:var(--green);margin-top:2px;}
+
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.5rem;}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.1rem 1.25rem;}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+    .card-title{font-size:13px;font-weight:500;color:var(--text-2);text-transform:uppercase;letter-spacing:.5px;}
+    .card-link{font-size:12px;color:var(--green);cursor:pointer;}
+
+    .xp-section{margin-bottom:1rem;}
+    .level-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;}
+    .level-badge{font-size:13px;font-weight:500;color:var(--green-dark);background:var(--green-light);padding:3px 10px;border-radius:99px;}
+    .xp-nums{font-size:12px;color:var(--text-3);}
+    .xp-track{background:var(--bg-soft);border-radius:99px;height:8px;overflow:hidden;}
+    .xp-fill{background:var(--green);height:100%;border-radius:99px;transition:width .6s ease;}
+    .xp-hint{font-size:11px;color:var(--text-3);margin-top:5px;}
+
+    .badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+    .badge-item{background:var(--bg-soft);border-radius:var(--radius-md);padding:.75rem;text-align:center;}
+    .badge-icon{font-size:22px;margin-bottom:4px;}
+    .badge-name{font-size:11px;font-weight:500;color:var(--text-2);}
+    .badge-desc{font-size:10px;color:var(--text-3);}
+    .badge-item.locked{opacity:.35;}
+
+    .streak-row{display:flex;gap:5px;margin-bottom:.75rem;}
+    .s-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;}
+    .s-done{background:var(--green);color:#fff;}
+    .s-today{background:var(--bg-soft);border:1.5px solid var(--green);color:var(--green-dark);}
+    .s-empty{background:var(--bg-softer);color:var(--text-3);}
+    .streak-stat{display:flex;justify-content:space-between;font-size:12px;color:var(--text-3);}
+    .streak-stat span{color:var(--text-2);}
+
+    .file-row{display:flex;align-items:center;gap:10px;padding:.6rem 0;border-bottom:1px solid var(--border);}
+    .file-row:last-child{border-bottom:none;padding-bottom:0;}
+    .file-ico{width:30px;height:30px;border-radius:var(--radius-sm);background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+    .file-name{font-size:13px;font-weight:500;color:var(--text);flex:1;}
+    .file-meta{font-size:11px;color:var(--text-3);}
+    .file-xp{font-size:11px;color:var(--green);font-weight:500;}
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="logo" onclick="window.location.href='index.html'">Study<span>Up</span></div>
+    <div class="nav-section-label">Meny</div>
+    <a class="nav-item" href="index.html"><span class="nav-icon">🏠</span> Hem</a>
+    <a class="nav-item" href="studyup-home.html"><span class="nav-icon">📚</span> Kurser</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📄</span> Mina filer</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🏆</span> Ranking</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🔍</span> Utforska</a>
+    <div class="nav-section-label" style="margin-top:1rem;">Mina kurser</div>
+    <a class="nav-item" href="studyup-course.html"><span class="nav-icon">📘</span> Offentlig förvaltning</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📗</span> Statsvetenskap A</a>
+    <div class="sidebar-bottom">
+      <div class="user-row" onclick="window.location.href='studyup-profile.html'">
+        <div class="avatar-sm" id="sidebar-avatar">EW</div>
+        <div>
+          <div class="user-name" id="sidebar-name">Edward</div>
+          <div class="user-xp" id="sidebar-xp">310 XP · Nivå 3</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="profile-header">
+      <div class="avatar-lg" id="profile-avatar">EW</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profile-name">Edward W.</div>
+        <div class="profile-uni" id="profile-uni">Stockholms universitet</div>
+        <div class="profile-tags">
+          <div class="profile-tag green" id="profile-level">Nivå 3</div>
+          <div class="profile-tag">🔥 5 dagars streak</div>
+          <div class="profile-tag">📚 2 kurser</div>
+          <div class="profile-tag">📄 16 filer uppladdade</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <button class="edit-btn">Redigera profil</button>
+        <button class="logout-btn" onclick="handleLogout()">Logga ut</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-xp">310</div>
+        <div class="stat-label">Totalt XP</div>
+        <div class="stat-sub">+40 den här veckan</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-streak">5</div>
+        <div class="stat-label">Nuvarande streak</div>
+        <div class="stat-sub">dagar i rad</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">16</div>
+        <div class="stat-label">Filer uppladdade</div>
+        <div class="stat-sub">+2 den här veckan</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">47</div>
+        <div class="stat-label">Nedladdningar</div>
+        <div class="stat-sub">av dina filer</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">XP & nivå</div>
+        </div>
+        <div class="xp-section">
+          <div class="level-row">
+            <div class="level-badge">Nivå 3 – Scholar</div>
+            <div class="xp-nums">310 / 500 XP</div>
+          </div>
+          <div class="xp-track"><div class="xp-fill" style="width:62%"></div></div>
+          <div class="xp-hint">190 XP kvar till Nivå 4 – Expert</div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:1rem;">
+          <div class="card-title" style="margin-bottom:.75rem;">Veckans streak</div>
+          <div class="streak-row">
+            <div class="s-dot s-done">M</div>
+            <div class="s-dot s-done">T</div>
+            <div class="s-dot s-done">O</div>
+            <div class="s-dot s-done">T</div>
+            <div class="s-dot s-done">F</div>
+            <div class="s-dot s-today">L</div>
+            <div class="s-dot s-empty">S</div>
+          </div>
+          <div class="streak-stat">
+            <div>Längsta streak: <span>12 dagar</span></div>
+            <div>Totalt aktiva dagar: <span>34</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Badges</div>
+        </div>
+        <div class="badges-grid">
+          <div class="badge-item">
+            <div class="badge-icon">🔥</div>
+            <div class="badge-name">Streak starter</div>
+            <div class="badge-desc">5 dagar i rad</div>
+          </div>
+          <div class="badge-item">
+            <div class="badge-icon">📤</div>
+            <div class="badge-name">Bidragsgivare</div>
+            <div class="badge-desc">10 filer uppladdade</div>
+          </div>
+          <div class="badge-item">
+            <div class="badge-icon">⭐</div>
+            <div class="badge-name">Populär</div>
+            <div class="badge-desc">25 nedladdningar</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-icon">🏆</div>
+            <div class="badge-name">Toppstudent</div>
+            <div class="badge-desc">Topp 10 ranking</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-icon">💎</div>
+            <div class="badge-name">Expert</div>
+            <div class="badge-desc">Nå Nivå 4</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-icon">🌟</div>
+            <div class="badge-name">30-dagarsstreak</div>
+            <div class="badge-desc">30 dagar i rad</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Mina uppladdade filer</div>
+        <div class="card-link" onclick="window.location.href='studyup-course.html'">Se alla</div>
+      </div>
+      <div class="file-row">
+        <div class="file-ico">📄</div>
+        <div style="flex:1">
+          <div class="file-name">Föreläsning 4 – NPM.pdf</div>
+          <div class="file-meta">Offentlig förvaltning · Igår</div>
+        </div>
+        <div class="file-xp">+10 XP</div>
+      </div>
+      <div class="file-row">
+        <div class="file-ico">📄</div>
+        <div style="flex:1">
+          <div class="file-name">Implementering – Lipsky.pdf</div>
+          <div class="file-meta">Offentlig förvaltning · 5 dagar sedan</div>
+        </div>
+        <div class="file-xp">+10 XP</div>
+      </div>
+      <div class="file-row">
+        <div class="file-ico">📄</div>
+        <div style="flex:1">
+          <div class="file-name">Anteckningar vecka 3.pdf</div>
+          <div class="file-meta">Statsvetenskap A · 1 vecka sedan</div>
+        </div>
+        <div class="file-xp">+10 XP</div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://therlzdityimfanzxjld.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoZXJsemRpdHlpbWZhbnp4amxkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTQ1NzQsImV4cCI6MjA5MTA3MDU3NH0.S1sUD8qkIBMChXVxD2mSEzvoph6WUKSL3pa6uM89-p4';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadProfile() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { window.location.href = 'studyup-login.html'; return; }
+      const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+      if (profile) {
+        const initials = profile.username ? profile.username.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) : 'EW';
+        const xp = profile.xp || 0;
+        const streak = profile.streak || 0;
+        const level = Math.floor(xp / 200) + 1;
+        document.getElementById('profile-avatar').textContent = initials;
+        document.getElementById('sidebar-avatar').textContent = initials;
+        document.getElementById('profile-name').textContent = profile.username || 'Användare';
+        document.getElementById('sidebar-name').textContent = profile.username?.split(' ')[0] || 'Användare';
+        document.getElementById('profile-uni').textContent = profile.university || 'Universitet ej angivet';
+        document.getElementById('profile-level').textContent = 'Nivå ' + level;
+        document.getElementById('stat-xp').textContent = xp;
+        document.getElementById('stat-streak').textContent = streak;
+        document.getElementById('sidebar-xp').textContent = xp + ' XP · Nivå ' + level;
+      }
+    }
+
+    async function handleLogout() {
+      await sb.auth.signOut();
+      window.location.href = 'studyup-login.html';
+    }
+
+    loadProfile();
+  </script>
+
+</body>
+</html>
