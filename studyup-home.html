@@ -5,297 +5,115 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>StudyUp – Hem</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg:          #FAF9F6;
-      --bg-card:     #FFFFFF;
-      --bg-soft:     #F3F0EB;
-      --bg-softer:   #EDE9E2;
-      --green:       #3D9970;
-      --green-light: #E8F5EE;
-      --green-dark:  #2A6E4F;
-      --text:        #1C1C1A;
-      --text-2:      #5C5B57;
-      --text-3:      #9C9A94;
-      --border:      rgba(0,0,0,0.08);
-      --radius-sm:   8px;
-      --radius-md:   12px;
-      --radius-lg:   18px;
-      --sidebar-w:   230px;
+      --bg:#FAF9F6;--bg-card:#FFFFFF;--bg-soft:#F3F0EB;--bg-softer:#EDE9E2;
+      --green:#3D9970;--green-light:#E8F5EE;--green-dark:#2A6E4F;
+      --text:#1C1C1A;--text-2:#5C5B57;--text-3:#9C9A94;
+      --border:rgba(0,0,0,0.08);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;
+      --sidebar-w:230px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 15px;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      display: flex;
-      min-height: 100vh;
-    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;display:flex;min-height:100vh;}
 
-    /* SIDEBAR */
-    .sidebar {
-      width: var(--sidebar-w);
-      min-height: 100vh;
-      background: var(--bg-card);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem 1rem;
-      position: fixed;
-      top: 0; left: 0;
-    }
-    .logo {
-      font-family: 'DM Serif Display', serif;
-      font-size: 20px;
-      color: var(--text);
-      padding: 0 0.5rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 1rem;
-    }
-    .logo span { color: var(--green); }
+    .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--bg-card);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 1rem;position:fixed;top:0;left:0;}
+    .logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);padding:0 .5rem 1.25rem;border-bottom:1px solid var(--border);margin-bottom:1rem;cursor:pointer;}
+    .logo span{color:var(--green);}
+    .nav-section-label{font-size:10px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;padding:0 .5rem;margin:.75rem 0 .35rem;}
+    .nav-item{display:flex;align-items:center;gap:9px;padding:.5rem .75rem;border-radius:var(--radius-sm);font-size:13px;color:var(--text-2);cursor:pointer;transition:background .15s,color .15s;text-decoration:none;}
+    .nav-item:hover{background:var(--bg-soft);color:var(--text);}
+    .nav-item.active{background:var(--green-light);color:var(--green-dark);font-weight:500;}
+    .nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+    .sidebar-bottom{margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);}
+    .user-row{display:flex;align-items:center;gap:9px;padding:.5rem .75rem;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s;}
+    .user-row:hover{background:var(--bg-soft);}
+    .avatar{width:30px;height:30px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--green-dark);flex-shrink:0;}
+    .user-name{font-size:13px;font-weight:500;color:var(--text);}
+    .user-xp{font-size:11px;color:var(--text-3);}
 
-    .nav-section-label {
-      font-size: 10px;
-      font-weight: 500;
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      padding: 0 0.5rem;
-      margin: 0.75rem 0 0.35rem;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 0.5rem 0.75rem;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      color: var(--text-2);
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-      text-decoration: none;
-    }
-    .nav-item:hover { background: var(--bg-soft); color: var(--text); }
-    .nav-item.active { background: var(--green-light); color: var(--green-dark); font-weight: 500; }
-    .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+    .main{margin-left:var(--sidebar-w);flex:1;padding:2rem 2.5rem;background:var(--bg);}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem;}
+    .page-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);letter-spacing:-.3px;}
+    .page-date{font-size:13px;color:var(--text-3);}
 
-    .sidebar-bottom {
-      margin-top: auto;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
-    }
-    .user-row {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 0.5rem 0.75rem;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .user-row:hover { background: var(--bg-soft); }
-    .avatar {
-      width: 30px; height: 30px; border-radius: 50%;
-      background: var(--green-light);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 500; color: var(--green-dark);
-      flex-shrink: 0;
-    }
-    .user-name { font-size: 13px; font-weight: 500; color: var(--text); }
-    .user-xp { font-size: 11px; color: var(--text-3); }
+    .streak-banner{background:var(--green-light);border:1px solid rgba(61,153,112,.2);border-radius:var(--radius-lg);padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+    .streak-left{display:flex;align-items:center;gap:14px;}
+    .streak-flame{font-size:28px;}
+    .streak-info-title{font-size:15px;font-weight:500;color:var(--green-dark);}
+    .streak-info-sub{font-size:12px;color:var(--green);}
+    .streak-days{display:flex;gap:6px;}
+    .s-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;}
+    .s-done{background:var(--green);color:#fff;}
+    .s-today{background:#fff;border:1.5px solid var(--green);color:var(--green-dark);}
+    .s-today.logged{background:var(--green);color:#fff;}
+    .s-empty{background:rgba(61,153,112,.12);color:var(--green);}
+    .log-btn{padding:.55rem 1.1rem;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:background .15s;white-space:nowrap;}
+    .log-btn:hover{background:var(--green-dark);}
+    .log-btn:disabled{background:var(--text-3);cursor:not-allowed;}
+    .log-btn.logged{background:var(--green-dark);}
 
-    /* MAIN */
-    .main {
-      margin-left: var(--sidebar-w);
-      flex: 1;
-      padding: 2rem 2.5rem;
-      background: var(--bg);
-    }
+    .metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:1.5rem;}
+    .metric{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.2rem;}
+    .metric-label{font-size:12px;color:var(--text-3);margin-bottom:4px;}
+    .metric-val{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);line-height:1;}
+    .metric-sub{font-size:12px;color:var(--text-3);margin-top:4px;}
+    .metric-sub.up{color:var(--green);}
 
-    .page-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.75rem;
-    }
-    .page-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 26px;
-      color: var(--text);
-      letter-spacing: -0.3px;
-    }
-    .page-date { font-size: 13px; color: var(--text-3); }
+    .xp-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.2rem;margin-bottom:1.5rem;}
+    .xp-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+    .xp-title{font-size:13px;font-weight:500;color:var(--text-2);}
+    .xp-nums{font-size:12px;color:var(--text-3);}
+    .xp-track{background:var(--bg-soft);border-radius:99px;height:8px;overflow:hidden;}
+    .xp-fill{background:var(--green);height:100%;border-radius:99px;transition:width .6s ease;}
+    .xp-milestones{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-top:6px;}
 
-    /* STREAK BANNER */
-    .streak-banner {
-      background: var(--green-light);
-      border: 1px solid rgba(61,153,112,0.2);
-      border-radius: var(--radius-lg);
-      padding: 1.1rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-    .streak-left { display: flex; align-items: center; gap: 14px; }
-    .streak-flame { font-size: 28px; }
-    .streak-info-title { font-size: 15px; font-weight: 500; color: var(--green-dark); }
-    .streak-info-sub { font-size: 12px; color: var(--green); }
-    .streak-days { display: flex; gap: 6px; }
-    .s-dot {
-      width: 30px; height: 30px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 500;
-    }
-    .s-done { background: var(--green); color: #fff; }
-    .s-today { background: #fff; border: 1.5px solid var(--green); color: var(--green-dark); }
-    .s-empty { background: rgba(61,153,112,0.12); color: var(--green); }
-    .log-btn {
-      padding: 0.55rem 1.1rem;
-      background: var(--green);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s;
-      white-space: nowrap;
-    }
-    .log-btn:hover { background: var(--green-dark); }
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.1rem 1.25rem;}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+    .card-title{font-size:13px;font-weight:500;color:var(--text-2);text-transform:uppercase;letter-spacing:.5px;}
+    .card-link{font-size:12px;color:var(--green);cursor:pointer;}
 
-    /* METRICS */
-    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 1.5rem; }
-    .metric {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 1rem 1.2rem;
-    }
-    .metric-label { font-size: 12px; color: var(--text-3); margin-bottom: 4px; }
-    .metric-val { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); line-height: 1; }
-    .metric-sub { font-size: 12px; color: var(--text-3); margin-top: 4px; }
-    .metric-sub.up { color: var(--green); }
+    .course-item{display:flex;align-items:center;gap:10px;padding:.6rem .75rem;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s;border:1px solid var(--border);margin-bottom:8px;text-decoration:none;}
+    .course-item:last-child{margin-bottom:0;}
+    .course-item:hover{background:var(--bg-soft);}
+    .course-ico{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+    .course-name{font-size:13px;font-weight:500;color:var(--text);flex:1;}
+    .course-meta{font-size:11px;color:var(--text-3);}
+    .badge-green{font-size:11px;background:var(--green-light);color:var(--green-dark);padding:2px 8px;border-radius:99px;font-weight:500;white-space:nowrap;}
+    .add-course{display:flex;align-items:center;gap:8px;padding:.55rem .75rem;border-radius:var(--radius-sm);border:1px dashed var(--border);font-size:13px;color:var(--text-3);cursor:pointer;transition:background .15s;margin-top:8px;}
+    .add-course:hover{background:var(--bg-soft);color:var(--text-2);}
 
-    /* XP BAR */
-    .xp-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 1rem 1.2rem;
-      margin-bottom: 1.5rem;
-    }
-    .xp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-    .xp-title { font-size: 13px; font-weight: 500; color: var(--text-2); }
-    .xp-nums { font-size: 12px; color: var(--text-3); }
-    .xp-track { background: var(--bg-soft); border-radius: 99px; height: 8px; overflow: hidden; }
-    .xp-fill { background: var(--green); height: 100%; width: 62%; border-radius: 99px; transition: width 0.6s ease; }
-    .xp-milestones { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); margin-top: 6px; }
+    .feed-item{display:flex;gap:10px;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid var(--border);}
+    .feed-item:last-child{border-bottom:none;padding-bottom:0;}
+    .feed-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0;margin-top:1px;}
+    .feed-text{font-size:13px;color:var(--text-2);line-height:1.5;flex:1;}
+    .feed-text strong{color:var(--text);font-weight:500;}
+    .feed-time{font-size:11px;color:var(--text-3);margin-top:2px;}
 
-    /* TWO COL */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.1rem 1.25rem;
-    }
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-    .card-title { font-size: 13px; font-weight: 500; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px; }
-    .card-link { font-size: 12px; color: var(--green); cursor: pointer; }
-    .card-link:hover { color: var(--green-dark); }
-
-    /* COURSE ITEMS */
-    .course-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0.6rem 0.75rem;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: background 0.15s;
-      border: 1px solid var(--border);
-      margin-bottom: 8px;
-      text-decoration: none;
-    }
-    .course-item:last-child { margin-bottom: 0; }
-    .course-item:hover { background: var(--bg-soft); }
-    .course-ico {
-      width: 32px; height: 32px; border-radius: var(--radius-sm);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; flex-shrink: 0;
-    }
-    .course-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
-    .course-meta { font-size: 11px; color: var(--text-3); }
-    .badge-green {
-      font-size: 11px;
-      background: var(--green-light);
-      color: var(--green-dark);
-      padding: 2px 8px;
-      border-radius: 99px;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-    .add-course {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0.55rem 0.75rem;
-      border-radius: var(--radius-sm);
-      border: 1px dashed var(--border);
-      font-size: 13px;
-      color: var(--text-3);
-      cursor: pointer;
-      transition: background 0.15s;
-      margin-top: 8px;
-    }
-    .add-course:hover { background: var(--bg-soft); color: var(--text-2); }
-
-    /* ACTIVITY FEED */
-    .feed-item { display: flex; gap: 10px; align-items: flex-start; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
-    .feed-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .feed-avatar {
-      width: 26px; height: 26px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 500; flex-shrink: 0; margin-top: 1px;
-    }
-    .feed-text { font-size: 13px; color: var(--text-2); line-height: 1.5; flex: 1; }
-    .feed-text strong { color: var(--text); font-weight: 500; }
-    .feed-time { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+    .toast{position:fixed;bottom:2rem;right:2rem;background:var(--green-dark);color:#fff;padding:.75rem 1.25rem;border-radius:var(--radius-md);font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;}
+    .toast.show{opacity:1;}
   </style>
 </head>
 <body>
 
   <aside class="sidebar">
-    <div class="logo">Study<span>Up</span></div>
-
+    <div class="logo" onclick="window.location.href='index.html'">Study<span>Up</span></div>
     <div class="nav-section-label">Meny</div>
     <a class="nav-item active" href="studyup-home.html"><span class="nav-icon">🏠</span> Hem</a>
     <a class="nav-item" href="studyup-course.html"><span class="nav-icon">📚</span> Kurser</a>
     <a class="nav-item" href="#"><span class="nav-icon">📄</span> Mina filer</a>
     <a class="nav-item" href="#"><span class="nav-icon">🏆</span> Ranking</a>
     <a class="nav-item" href="#"><span class="nav-icon">🔍</span> Utforska</a>
-
     <div class="nav-section-label" style="margin-top:1rem;">Mina kurser</div>
     <a class="nav-item" href="studyup-course.html"><span class="nav-icon">📘</span> Offentlig förvaltning</a>
     <a class="nav-item" href="#"><span class="nav-icon">📗</span> Statsvetenskap A</a>
-
     <div class="sidebar-bottom">
       <div class="user-row" onclick="window.location.href='studyup-profile.html'">
-        <div class="avatar">EW</div>
+        <div class="avatar" id="sidebar-avatar">–</div>
         <div>
-          <div class="user-name">Edward</div>
-          <div class="user-xp">310 XP · Nivå 3</div>
+          <div class="user-name" id="sidebar-name">Laddar...</div>
+          <div class="user-xp" id="sidebar-xp">– XP</div>
         </div>
       </div>
     </div>
@@ -303,67 +121,54 @@
 
   <main class="main">
     <div class="page-header">
-      <div class="page-title">Välkommen tillbaka, Edward 👋</div>
-      <div class="page-date">Måndag 6 april 2026</div>
+      <div class="page-title" id="welcome-title">Välkommen tillbaka 👋</div>
+      <div class="page-date" id="today-date"></div>
     </div>
 
-    <!-- STREAK BANNER -->
     <div class="streak-banner">
       <div class="streak-left">
         <div class="streak-flame">🔥</div>
         <div>
-          <div class="streak-info-title">5 dagars streak – håll igång!</div>
-          <div class="streak-info-sub">Logga en studiesession idag för att inte tappa streaken</div>
+          <div class="streak-info-title" id="streak-title">Laddar streak...</div>
+          <div class="streak-info-sub" id="streak-sub"></div>
         </div>
       </div>
-      <div class="streak-days">
-        <div class="s-dot s-done">M</div>
-        <div class="s-dot s-done">T</div>
-        <div class="s-dot s-done">O</div>
-        <div class="s-dot s-done">T</div>
-        <div class="s-dot s-done">F</div>
-        <div class="s-dot s-today">L</div>
-        <div class="s-dot s-empty">S</div>
-      </div>
-      <button class="log-btn">✓ Logga session</button>
+      <div class="streak-days" id="streak-dots"></div>
+      <button class="log-btn" id="log-btn" onclick="logSession()">✓ Logga session</button>
     </div>
 
-    <!-- METRICS -->
     <div class="metrics">
       <div class="metric">
         <div class="metric-label">Nuvarande streak</div>
-        <div class="metric-val">5</div>
+        <div class="metric-val" id="metric-streak">–</div>
         <div class="metric-sub">dagar i rad</div>
       </div>
       <div class="metric">
         <div class="metric-label">Totalt XP</div>
-        <div class="metric-val">310</div>
-        <div class="metric-sub up">+40 den här veckan</div>
+        <div class="metric-val" id="metric-xp">–</div>
+        <div class="metric-sub up" id="metric-xp-sub"></div>
       </div>
       <div class="metric">
         <div class="metric-label">Uppladdade filer</div>
-        <div class="metric-val">16</div>
-        <div class="metric-sub up">+2 den här veckan</div>
+        <div class="metric-val">0</div>
+        <div class="metric-sub">Ladda upp din första!</div>
       </div>
     </div>
 
-    <!-- XP BAR -->
     <div class="xp-card">
       <div class="xp-header">
-        <div class="xp-title">Framsteg till Nivå 4</div>
-        <div class="xp-nums">310 / 500 XP</div>
+        <div class="xp-title" id="xp-level-title">Framsteg till Nivå 2</div>
+        <div class="xp-nums" id="xp-nums">0 / 200 XP</div>
       </div>
-      <div class="xp-track"><div class="xp-fill"></div></div>
+      <div class="xp-track"><div class="xp-fill" id="xp-bar" style="width:0%"></div></div>
       <div class="xp-milestones">
-        <span>Nivå 3</span>
-        <span>190 XP kvar</span>
-        <span>Nivå 4</span>
+        <span id="xp-current-level">Nivå 1</span>
+        <span id="xp-remaining">200 XP kvar</span>
+        <span id="xp-next-level">Nivå 2</span>
       </div>
     </div>
 
-    <!-- TWO COL -->
     <div class="two-col">
-      <!-- COURSES -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">Dina kurser</div>
@@ -371,34 +176,26 @@
         </div>
         <a class="course-item" href="studyup-course.html">
           <div class="course-ico" style="background:#E8F5EE;">📘</div>
-          <div style="flex:1">
-            <div class="course-name">Offentlig förvaltning</div>
-            <div class="course-meta">12 filer · senast igår</div>
-          </div>
+          <div style="flex:1"><div class="course-name">Offentlig förvaltning</div><div class="course-meta">12 filer · senast igår</div></div>
           <div class="badge-green">12 filer</div>
         </a>
         <a class="course-item" href="#">
           <div class="course-ico" style="background:#EEEDFE;">📗</div>
-          <div style="flex:1">
-            <div class="course-name">Statsvetenskap A</div>
-            <div class="course-meta">4 filer · senast 3 dgr</div>
-          </div>
+          <div style="flex:1"><div class="course-name">Statsvetenskap A</div><div class="course-meta">4 filer · senast 3 dgr</div></div>
           <div class="badge-green">4 filer</div>
         </a>
         <div class="add-course">＋ Lägg till kurs...</div>
       </div>
 
-      <!-- FEED -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">Senaste aktivitet</div>
-          <div class="card-link">Se alla</div>
         </div>
         <div class="feed-item">
-          <div class="feed-avatar" style="background:#E8F5EE;color:#2A6E4F;">EW</div>
+          <div class="feed-avatar" style="background:#E8F5EE;color:#2A6E4F;" id="feed-avatar">–</div>
           <div>
-            <div class="feed-text">Du laddade upp <strong>Föreläsning 4 – NPM.pdf</strong> i Offentlig förvaltning</div>
-            <div class="feed-time">Igår · +10 XP</div>
+            <div class="feed-text">Du skapade ditt konto på StudyUp!</div>
+            <div class="feed-time">Välkommen 🎉</div>
           </div>
         </div>
         <div class="feed-item">
@@ -415,16 +212,154 @@
             <div class="feed-time">4 dagar sedan</div>
           </div>
         </div>
-        <div class="feed-item">
-          <div class="feed-avatar" style="background:#E8F5EE;color:#2A6E4F;">EW</div>
-          <div>
-            <div class="feed-text">Du nådde <strong>Nivå 3</strong> 🎉</div>
-            <div class="feed-time">5 dagar sedan</div>
-          </div>
-        </div>
       </div>
     </div>
   </main>
 
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const SUPABASE_URL = 'https://therlzdityimfanzxjld.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoZXJsemRpdHlpbWZhbnp4amxkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTQ1NzQsImV4cCI6MjA5MTA3MDU3NH0.S1sUD8qkIBMChXVxD2mSEzvoph6WUKSL3pa6uM89-p4';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentProfile = null;
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function getInitials(name) {
+      if (!name) return '?';
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+    }
+
+    function getLevelFromXP(xp) {
+      return Math.floor(xp / 200) + 1;
+    }
+
+    function getXPForLevel(level) {
+      return (level - 1) * 200;
+    }
+
+    function updateXPBar(xp) {
+      const level = getLevelFromXP(xp);
+      const levelStart = getXPForLevel(level);
+      const levelEnd = getXPForLevel(level + 1);
+      const progress = ((xp - levelStart) / (levelEnd - levelStart)) * 100;
+      document.getElementById('xp-bar').style.width = Math.round(progress) + '%';
+      document.getElementById('xp-level-title').textContent = 'Framsteg till Nivå ' + (level + 1);
+      document.getElementById('xp-nums').textContent = xp + ' / ' + levelEnd + ' XP';
+      document.getElementById('xp-current-level').textContent = 'Nivå ' + level;
+      document.getElementById('xp-next-level').textContent = 'Nivå ' + (level + 1);
+      document.getElementById('xp-remaining').textContent = (levelEnd - xp) + ' XP kvar';
+    }
+
+    function renderStreakDots(streak, loggedToday) {
+      const days = ['M','T','O','T','F','L','S'];
+      const today = new Date().getDay();
+      const todayIdx = today === 0 ? 6 : today - 1;
+      let html = '';
+      for (let i = 0; i < 7; i++) {
+        if (i < todayIdx) {
+          const daysAgo = todayIdx - i;
+          const done = streak >= daysAgo;
+          html += `<div class="s-dot ${done ? 's-done' : 's-empty'}">${days[i]}</div>`;
+        } else if (i === todayIdx) {
+          html += `<div class="s-dot s-today ${loggedToday ? 'logged' : ''}">${days[i]}</div>`;
+        } else {
+          html += `<div class="s-dot s-empty">${days[i]}</div>`;
+        }
+      }
+      document.getElementById('streak-dots').innerHTML = html;
+    }
+
+    function setTodayDate() {
+      const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+      document.getElementById('today-date').textContent = new Date().toLocaleDateString('sv-SE', opts);
+    }
+
+    async function loadProfile() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { window.location.href = 'studyup-login.html'; return; }
+
+      const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+
+      if (!profile) {
+        await sb.from('profiles').insert({ id: session.user.id, username: session.user.email.split('@')[0], xp: 0, streak: 0 });
+        location.reload(); return;
+      }
+
+      currentProfile = profile;
+      const xp = profile.xp || 0;
+      const streak = profile.streak || 0;
+      const firstName = profile.username ? profile.username.split(' ')[0] : 'där';
+      const initials = getInitials(profile.username);
+      const today = new Date().toISOString().slice(0,10);
+      const loggedToday = profile.last_active === today;
+
+      document.getElementById('welcome-title').textContent = 'Välkommen tillbaka, ' + firstName + ' 👋';
+      document.getElementById('sidebar-name').textContent = firstName;
+      document.getElementById('sidebar-avatar').textContent = initials;
+      document.getElementById('sidebar-xp').textContent = xp + ' XP · Nivå ' + getLevelFromXP(xp);
+      document.getElementById('metric-streak').textContent = streak;
+      document.getElementById('metric-xp').textContent = xp;
+      document.getElementById('feed-avatar').textContent = initials;
+
+      if (loggedToday) {
+        document.getElementById('streak-title').textContent = streak + ' dagars streak – bra jobbat idag!';
+        document.getElementById('streak-sub').textContent = 'Du har redan loggat en session idag ✓';
+        const btn = document.getElementById('log-btn');
+        btn.textContent = '✓ Loggad idag';
+        btn.disabled = true;
+        btn.classList.add('logged');
+      } else {
+        document.getElementById('streak-title').textContent = streak > 0 ? streak + ' dagars streak – håll igång!' : 'Starta din streak idag!';
+        document.getElementById('streak-sub').textContent = 'Logga en studiesession idag för att ' + (streak > 0 ? 'inte tappa streaken' : 'börja din streak');
+      }
+
+      renderStreakDots(streak, loggedToday);
+      updateXPBar(xp);
+    }
+
+    async function logSession() {
+      if (!currentProfile) return;
+      const today = new Date().toISOString().slice(0,10);
+      if (currentProfile.last_active === today) return;
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().slice(0,10);
+      const newStreak = currentProfile.last_active === yesterdayStr ? (currentProfile.streak || 0) + 1 : 1;
+      const newXP = (currentProfile.xp || 0) + 10;
+
+      await sb.from('profiles').update({ streak: newStreak, xp: newXP, last_active: today }).eq('id', currentProfile.id);
+
+      currentProfile.streak = newStreak;
+      currentProfile.xp = newXP;
+      currentProfile.last_active = today;
+
+      document.getElementById('metric-streak').textContent = newStreak;
+      document.getElementById('metric-xp').textContent = newXP;
+      document.getElementById('streak-title').textContent = newStreak + ' dagars streak – bra jobbat!';
+      document.getElementById('streak-sub').textContent = 'Du har loggat en session idag ✓';
+      document.getElementById('sidebar-xp').textContent = newXP + ' XP · Nivå ' + getLevelFromXP(newXP);
+
+      const btn = document.getElementById('log-btn');
+      btn.textContent = '✓ Loggad idag';
+      btn.disabled = true;
+      btn.classList.add('logged');
+
+      renderStreakDots(newStreak, true);
+      updateXPBar(newXP);
+      showToast('🔥 +10 XP! Streak: ' + newStreak + ' dagar');
+    }
+
+    setTodayDate();
+    loadProfile();
+  </script>
 </body>
 </html>
