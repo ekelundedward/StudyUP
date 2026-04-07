@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyUp – Logga in</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg:#FAF9F6;--bg-card:#FFFFFF;--bg-soft:#F3F0EB;--bg-softer:#EDE9E2;
+      --green:#3D9970;--green-light:#E8F5EE;--green-dark:#2A6E4F;
+      --text:#1C1C1A;--text-2:#5C5B57;--text-3:#9C9A94;
+      --border:rgba(0,0,0,0.08);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;
+      --red:#C0392B;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;}
+    .left{background:var(--bg-soft);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;padding:2.5rem;min-height:100vh;}
+    .left-logo{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);}
+    .left-logo span{color:var(--green);}
+    .left-logo a{text-decoration:none;color:inherit;}
+    .left-content{flex:1;display:flex;flex-direction:column;justify-content:center;padding:3rem 0;}
+    .left-label{font-size:11px;font-weight:500;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:.75rem;}
+    .left-title{font-family:'DM Serif Display',serif;font-size:32px;color:var(--text);line-height:1.2;letter-spacing:-.5px;margin-bottom:1rem;}
+    .left-title em{color:var(--green);font-style:normal;}
+    .left-desc{font-size:14px;color:var(--text-2);line-height:1.75;margin-bottom:2rem;max-width:340px;}
+    .testimonial{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.1rem 1.25rem;}
+    .testimonial-text{font-size:13px;color:var(--text-2);line-height:1.65;margin-bottom:.75rem;font-style:italic;}
+    .testimonial-author{display:flex;align-items:center;gap:9px;}
+    .t-avatar{width:28px;height:28px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--green-dark);flex-shrink:0;}
+    .t-name{font-size:12px;font-weight:500;color:var(--text);}
+    .t-course{font-size:11px;color:var(--text-3);}
+    .left-stats{display:flex;gap:1.5rem;}
+    .left-stat-num{font-family:'DM Serif Display',serif;font-size:22px;color:var(--green);}
+    .left-stat-label{font-size:12px;color:var(--text-3);margin-top:1px;}
+    .right{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem;background:var(--bg-card);min-height:100vh;}
+    .form-card{width:100%;max-width:380px;}
+    .form-header{margin-bottom:2rem;text-align:center;}
+    .form-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);letter-spacing:-.3px;margin-bottom:.4rem;}
+    .form-sub{font-size:13px;color:var(--text-2);}
+    .tabs{display:flex;background:var(--bg-soft);border-radius:var(--radius-sm);padding:3px;margin-bottom:1.75rem;}
+    .tab{flex:1;text-align:center;padding:.5rem;font-size:13px;font-weight:500;color:var(--text-3);cursor:pointer;border-radius:calc(var(--radius-sm) - 2px);transition:all .15s;user-select:none;}
+    .tab.active{background:var(--bg-card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+    .form-body{display:flex;flex-direction:column;gap:14px;}
+    .field{display:flex;flex-direction:column;gap:5px;}
+    .field label{font-size:13px;font-weight:500;color:var(--text-2);}
+    .field input{padding:.65rem .9rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s;}
+    .field input:focus{border-color:var(--green);background:var(--bg-card);}
+    .field input::placeholder{color:var(--text-3);}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .forgot{font-size:12px;color:var(--green);cursor:pointer;text-align:right;margin-top:-6px;}
+    .submit-btn{width:100%;padding:.75rem;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:background .15s;margin-top:4px;}
+    .submit-btn:hover{background:var(--green-dark);}
+    .submit-btn:disabled{background:var(--text-3);cursor:not-allowed;}
+    .divider{display:flex;align-items:center;gap:10px;margin:4px 0;}
+    .divider-line{flex:1;height:1px;background:var(--border);}
+    .divider-text{font-size:12px;color:var(--text-3);}
+    .google-btn{width:100%;padding:.7rem;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;}
+    .google-btn:hover{background:var(--bg-soft);}
+    .terms{font-size:11px;color:var(--text-3);text-align:center;line-height:1.6;margin-top:4px;}
+    .terms a{color:var(--green);cursor:pointer;}
+    .switch-text{font-size:13px;color:var(--text-2);text-align:center;margin-top:1.5rem;}
+    .switch-link{color:var(--green);cursor:pointer;font-weight:500;}
+    .switch-link:hover{color:var(--green-dark);}
+    .alert{padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:13px;margin-bottom:8px;display:none;}
+    .alert.error{background:#FDEDED;color:var(--red);border:1px solid rgba(192,57,43,.2);}
+    .alert.success{background:var(--green-light);color:var(--green-dark);border:1px solid rgba(61,153,112,.2);}
+    .alert.show{display:block;}
+  </style>
+</head>
+<body>
+
+  <div class="left">
+    <div class="left-logo"><a href="index.html">Study<span>Up</span></a></div>
+    <div class="left-content">
+      <div class="left-label">Välkommen till StudyUp</div>
+      <h2 class="left-title">Plugga bättre.<br><em>Tillsammans.</em></h2>
+      <p class="left-desc">Hitta anteckningar och sammanfattningar från studenter på din kurs — och bygg din streak dag för dag.</p>
+      <div class="testimonial">
+        <p class="testimonial-text">"Hittade en perfekt sammanfattning till tentan dagen innan. Räddade mig helt!"</p>
+        <div class="testimonial-author">
+          <div class="t-avatar">SK</div>
+          <div>
+            <div class="t-name">Sara K.</div>
+            <div class="t-course">Juridik, Stockholms universitet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="left-stats">
+      <div><div class="left-stat-num">2 400+</div><div class="left-stat-label">studenter</div></div>
+      <div><div class="left-stat-num">8 900+</div><div class="left-stat-label">filer uppladdade</div></div>
+      <div><div class="left-stat-num">320+</div><div class="left-stat-label">aktiva kurser</div></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-title" id="form-title">Välkommen tillbaka</div>
+        <div class="form-sub" id="form-sub">Logga in på ditt konto</div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" id="tab-login" onclick="showTab('login')">Logga in</div>
+        <div class="tab" id="tab-register" onclick="showTab('register')">Skapa konto</div>
+      </div>
+
+      <div id="alert" class="alert"></div>
+
+      <!-- LOGIN -->
+      <div id="panel-login">
+        <div class="form-body">
+          <div class="field">
+            <label>E-post</label>
+            <input type="email" id="login-email" placeholder="din@email.se" />
+          </div>
+          <div class="field">
+            <label>Lösenord</label>
+            <input type="password" id="login-password" placeholder="••••••••" />
+          </div>
+          <div class="forgot">Glömt lösenordet?</div>
+          <button class="submit-btn" id="login-btn" onclick="handleLogin()">Logga in</button>
+          <div class="divider"><div class="divider-line"></div><div class="divider-text">eller</div><div class="divider-line"></div></div>
+          <button class="google-btn" onclick="handleGoogle()">
+            <span style="font-size:16px;">G</span> Fortsätt med Google
+          </button>
+        </div>
+        <div class="switch-text">Inget konto? <span class="switch-link" onclick="showTab('register')">Skapa ett gratis</span></div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="panel-register" style="display:none;">
+        <div class="form-body">
+          <div class="field-row">
+            <div class="field"><label>Förnamn</label><input type="text" id="reg-firstname" placeholder="Edward" /></div>
+            <div class="field"><label>Efternamn</label><input type="text" id="reg-lastname" placeholder="W." /></div>
+          </div>
+          <div class="field"><label>E-post</label><input type="email" id="reg-email" placeholder="din@email.se" /></div>
+          <div class="field"><label>Lösenord</label><input type="password" id="reg-password" placeholder="Minst 6 tecken" /></div>
+          <div class="field"><label>Universitet</label><input type="text" id="reg-university" placeholder="t.ex. Stockholms universitet" /></div>
+          <button class="submit-btn" id="register-btn" onclick="handleRegister()">Skapa konto gratis</button>
+          <div class="divider"><div class="divider-line"></div><div class="divider-text">eller</div><div class="divider-line"></div></div>
+          <button class="google-btn" onclick="handleGoogle()">
+            <span style="font-size:16px;">G</span> Fortsätt med Google
+          </button>
+          <p class="terms">Genom att skapa ett konto godkänner du våra <a>användarvillkor</a> och <a>integritetspolicy</a>.</p>
+        </div>
+        <div class="switch-text">Har du redan ett konto? <span class="switch-link" onclick="showTab('login')">Logga in</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://therlzdityimfanzxjld.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoZXJsemRpdHlpbWZhbnp4amxkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTQ1NzQsImV4cCI6MjA5MTA3MDU3NH0.S1sUD8qkIBMChXVxD2mSEzvoph6WUKSL3pa6uM89-p4';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function showTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('tab-login').classList.toggle('active', isLogin);
+      document.getElementById('tab-register').classList.toggle('active', !isLogin);
+      document.getElementById('panel-login').style.display = isLogin ? 'block' : 'none';
+      document.getElementById('panel-register').style.display = isLogin ? 'none' : 'block';
+      document.getElementById('form-title').textContent = isLogin ? 'Välkommen tillbaka' : 'Skapa ditt konto';
+      document.getElementById('form-sub').textContent = isLogin ? 'Logga in på ditt konto' : 'Gratis för alla studenter';
+      hideAlert();
+    }
+
+    function showAlert(msg, type) {
+      const el = document.getElementById('alert');
+      el.textContent = msg;
+      el.className = 'alert ' + type + ' show';
+    }
+    function hideAlert() {
+      document.getElementById('alert').className = 'alert';
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) return showAlert('Fyll i e-post och lösenord.', 'error');
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true; btn.textContent = 'Loggar in...';
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        showAlert('Fel e-post eller lösenord. Försök igen.', 'error');
+        btn.disabled = false; btn.textContent = 'Logga in';
+      } else {
+        showAlert('Inloggad! Skickar dig vidare...', 'success');
+        setTimeout(() => window.location.href = 'studyup-home.html', 1000);
+      }
+    }
+
+    async function handleRegister() {
+      const firstname = document.getElementById('reg-firstname').value;
+      const lastname = document.getElementById('reg-lastname').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      const university = document.getElementById('reg-university').value;
+      if (!firstname || !email || !password) return showAlert('Fyll i alla obligatoriska fält.', 'error');
+      if (password.length < 6) return showAlert('Lösenordet måste vara minst 6 tecken.', 'error');
+      const btn = document.getElementById('register-btn');
+      btn.disabled = true; btn.textContent = 'Skapar konto...';
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if (error) {
+        showAlert(error.message, 'error');
+        btn.disabled = false; btn.textContent = 'Skapa konto gratis';
+      } else {
+        if (data.user) {
+          await sb.from('profiles').insert({
+            id: data.user.id,
+            username: firstname + ' ' + lastname,
+            university: university,
+            xp: 0,
+            streak: 0
+          });
+        }
+        showAlert('Konto skapat! Skickar dig vidare...', 'success');
+        setTimeout(() => window.location.href = 'studyup-home.html', 1200);
+      }
+    }
+
+    async function handleGoogle() {
+      await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/studyup-home.html' } });
+    }
+
+    sb.auth.getSession().then(({ data }) => {
+      if (data.session) window.location.href = 'studyup-home.html';
+    });
+  </script>
+</body>
+</html>
